@@ -58,6 +58,47 @@ const fn mf(
 /// `PIDWired` / `PIDWireless` / `PIDWireless4K8K` から。usage_page/usage は
 /// HTS Plus Pro 実機 (0xFF02 / 0x02) と同じと仮定 — **他機種は実機で要確認**。
 pub const KNOWN: &[KnownDevice] = &[
+    // Logitech: enumerated on Windows 2026-11-25. Detection only; no settings
+    // driver is enabled until protocol capabilities and safe writes are tested.
+    KnownDevice {
+        vid: 0x046D,
+        pid: 0xC095,
+        usage_page: Some(0xFF00),
+        usage: Some(0x02),
+        kind: DeviceKind::Mouse,
+        vendor: "Logicool",
+        model: "g502-x-plus",
+        name: "G502 X PLUS (USB)",
+        transport: Transport::Wired,
+        driver: DriverKind::Unsupported,
+        verified: false,
+    },
+    KnownDevice {
+        vid: 0x046D,
+        pid: 0xC547,
+        usage_page: Some(0xFF00),
+        usage: Some(0x02),
+        kind: DeviceKind::Mouse,
+        vendor: "Logicool",
+        model: "lightspeed-c547",
+        name: "LIGHTSPEED receiver (paired device unverified)",
+        transport: Transport::Wireless24G,
+        driver: DriverKind::Unsupported,
+        verified: false,
+    },
+    KnownDevice {
+        vid: 0x046D,
+        pid: 0xC339,
+        usage_page: Some(0xFF43),
+        usage: Some(0x0602),
+        kind: DeviceKind::Keyboard,
+        vendor: "Logicool",
+        model: "g-pro-keyboard",
+        name: "G PRO Keyboard",
+        transport: Transport::Wired,
+        driver: DriverKind::Unsupported,
+        verified: false,
+    },
     // ---------------------------------------------------------------- キーボード
     KnownDevice {
         vid: 0x1CA6,
@@ -281,6 +322,27 @@ pub fn match_device(
             && k.usage_page.is_none_or(|p| p == usage_page)
             && k.usage.is_none_or(|u| u == usage)
     })
+}
+
+#[cfg(test)]
+mod logitech_tests {
+    use super::*;
+
+    #[test]
+    fn detection_only_uses_observed_vendor_collections() {
+        for (pid, page, usage) in [
+            (0xc095, 0xff00, 2),
+            (0xc547, 0xff00, 2),
+            (0xc339, 0xff43, 0x0602),
+        ] {
+            let spec = match_device(0x046d, pid, page, usage).unwrap();
+            assert_eq!(spec.driver, DriverKind::Unsupported);
+            assert!(!spec.verified);
+            assert!(match_device(0x046d, pid, 1, 6).is_none());
+            assert!(match_device(0x046d, pid, 0x59, 1).is_none());
+        }
+        assert!(match_device(0x046d, 0xc339, 0xff43, 0x0604).is_none());
+    }
 }
 
 // ------------------------------------------------------------------ レイアウト

@@ -22,6 +22,7 @@ use std::sync::{Arc, Mutex};
 pub mod atk;
 #[doc(hidden)]
 pub mod lamzu;
+pub mod logitech_probe;
 #[allow(dead_code)]
 mod mousefit;
 mod mousefit8;

@@ -25,3 +25,7 @@ dist/
 # メーカー配布原本・解析用の抜粋（公開ツリーには入れない）
 /analysis/
 /.private-analysis/
+
+# Lighting preservation helper caches
+__pycache__/
+*.pyc
